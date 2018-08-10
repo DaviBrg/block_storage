@@ -1,61 +1,37 @@
-#include <algorithm>
-#include <cmath>
-#include <iostream>
-#include <random>
-#include <string>
-#include <set>
-#include <vector>
-#include <map>
+#include <unistd.h>
 
-#include "block_storage.h"
-#include "blkstorage.h"
-#include "data_base_disk.h"
-#include "disk_log.h"
-#include "workload_generator.h"
+#include "persistent_list.h"
 
-using namespace std;
 
-const string kStorageFilePath = "/home/luiky/Documents/log";
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 
-    WorkloadGenerator wg;
-    map<int, double> database;
-    DataBaseDisk d(kStorageFilePath);
+    const char* path = "/mnt/mem/pmem_content";
+    const char* layout = "queue";
 
-    auto txs= wg.Generate(78*2,0.005,5,3);
-    cout << endl << "-------------------------IDs E OBJETOS-------------------------" << endl;
-    for(auto& tx:txs)
-    {
-        for (auto& obj:tx)
-        {
-            cout << "ID: " << obj << " OBJ: " << ++database[obj] << '\t';
-        }
-        cout << endl;
-        d.executeTransaction(tx);
+    pmem::obj::pool<PersistentList<uint64_t>> pool;
+
+    if (access(path, F_OK) != 0) {
+        pool = pmem::obj::pool<PersistentList<uint64_t>>::create(
+                                                path, layout,
+                                                PMEMOBJ_MIN_POOL,
+                                                S_IWUSR | S_IRUSR);
+        } else {
+        pool = pmem::obj::pool<PersistentList<uint64_t>>::open(path, layout);
     }
-    cout << endl << "------------------------COMPARAÇÃO------------------------" << endl;
 
-    map<int,double> before = d.getDataBase();
+    auto list = pool.get_root();
 
-    d.recover();
+    if (list->IsEmpty()) {
+        std::cout << "Empty!" << std::endl;
+    }
+    else {
+        std::cout << "Not empty!" << std::endl;
+    }
 
-    map<int,double> after = d.getDataBase();
 
-    for_each(after.begin(),after.end(),[&before](pair<int,double> p)
-        {
-            cout << (before[p.first] == p.second) << endl;
-        });
+
+    pool.close();
+
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
