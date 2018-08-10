@@ -25,8 +25,8 @@
 
 template <typename T>
 struct ListNode {
-        pmem::obj::persistent_ptr<ListNode> next;
-        pmem::obj::persistent_ptr<ListNode> previous;
+        pmem::obj::persistent_ptr<ListNode<T>> next;
+        pmem::obj::persistent_ptr<ListNode<T>> previous;
         pmem::obj::p<uint64_t> key;
         pmem::obj::p<T> obj;
 };
@@ -41,9 +41,19 @@ public:
 
     ListNode<T>* Push(pmem::obj::pool_base &pool, uint64_t key, const  T &value) {
         pmem::obj::transaction::exec_tx(pool, [&] {
-            auto node = pmem::obj::make_persistent<ListNode<T>>();
+            auto current = pmem::obj::make_persistent<ListNode<T>>();
+            current->key = key;
+            current->value = value;
+            if (head_ == nullptr) {
+                head_ = current;
+            }
+            else {
+                current->next = head_;
+                head_->previous = current;
+                head_ = current;
+            }
         });
-
+        return head_.get();
     }
 
 

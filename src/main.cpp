@@ -2,8 +2,6 @@
 
 #include "persistent_list.h"
 
-
-
 int main(int argc, char *argv[]) {
 
     const char* path = "/mnt/mem/pmem_content";
@@ -28,8 +26,6 @@ int main(int argc, char *argv[]) {
     else {
         std::cout << "Not empty!" << std::endl;
     }
-
-
 
     pool.close();
 
