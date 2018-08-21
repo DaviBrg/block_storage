@@ -59,11 +59,8 @@ public:
                     pmem::obj::persistent_ptr<ListNode<T>>> &lookup_table) {
         auto current = head_;
         while (current != nullptr) {
-            data_base.insert(std::make_pair<uint64_t,T>(
-                                 current->obj.get_ro().id, current->obj.get_ro()));
-            lookup_table.insert(std::make_pair<uint64_t,
-                                pmem::obj::persistent_ptr<ListNode<T>>>>(
-                                    current->obj.get_ro().id, current));
+            data_base.insert({current->obj.get_ro().id, current->obj.get_ro()});
+            lookup_table.insert({current->obj.get_ro().id, current});
             current = current->next;
         }
     }

@@ -2,9 +2,16 @@
 
 #include "persistent_list.h"
 
+constexpr size_t kDataSize = 1000000;
+constexpr size_t kMetaDataSize = 24;
+constexpr size_t kPoolSize = 4000000000;
+constexpr size_t kPracticalPoolSize = 3500000000;
+constexpr size_t kNumObjToWrite = kPracticalPoolSize/(kDataSize+kMetaDataSize);
+constexpr double kPercentNumObjToWrite = ((double)kNumObjToWrite)/100.0;
+
 struct Tuple {
     uint64_t id;
-    char data[500];
+    char data[kDataSize];
 };
 
 int main(int argc, char *argv[]) {
@@ -15,14 +22,12 @@ int main(int argc, char *argv[]) {
     pmem::obj::pool<PersistentList<Tuple>> pool;
 
 
-    size_t pool_size = 4000000000;
-
     bool first_time = false;
 
 
     if (access(path, F_OK) != 0) {
         pool = pmem::obj::pool<PersistentList<Tuple>>::create(
-                                                path, layout, pool_size,
+                                                path, layout, kPoolSize,
                                                 S_IWUSR | S_IRUSR);
         first_time = true;
         }
@@ -45,12 +50,13 @@ int main(int argc, char *argv[]) {
         intention_list.push_back(t);
         intention_list.push_back(t);
 
-        for (uint64_t i = 0; i < 20; i +=3) {
+
+        for (uint64_t i = 0; i < kNumObjToWrite; i +=3) {
             intention_list[0].id = i;
             intention_list[1].id = i+1;
             intention_list[2].id = i+2;
             recovery_manager->Commit(pool, intention_list, lookup_table);
-            std::cout << i << std::endl;
+            std::cout  <<  (((double)i)/kPercentNumObjToWrite)<< "%" << std::endl;
         }
     }
     else {
