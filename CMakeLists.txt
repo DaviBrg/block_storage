@@ -14,11 +14,11 @@ set(HEADERS
     include/data_base.h
     include/sql_parser.h
     include/persistent_list.h
+    include/txentry.h
 )
 
 set(SOURCES
     src/main.cpp
-    src/workload_generator.cpp
     src/disk_log.cpp
     src/blkstorage.cpp
     src/data_base_disk.cpp

@@ -6,12 +6,12 @@
 #include <map>
 #include <set>
 
+template <typename Key, typename Value>
 class DataBase {
 public:
 
-    virtual void executeTransaction(const std::set<int> &tx) = 0;
-    virtual std::map<int,double> getDataBase() = 0;
-    virtual void recover() = 0;
+    virtual void ExecuteTransaction(const std::set<int> &tx) = 0;
+    virtual void Recover() = 0;
 };
 
 #endif // DATA_BASE_H
