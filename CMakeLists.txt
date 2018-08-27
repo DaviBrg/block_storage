@@ -11,10 +11,13 @@ set(HEADERS
     include/data_base_disk.h
     include/lru.h
     include/block_storage.h
-    include/data_base.h
     include/sql_parser.h
     include/persistent_list.h
     include/txentry.h
+    include/data_base_pmem.h
+    include/pmem_log.h
+    include/disk_pmem.h
+    include/data_base_pmem_disk.h
 )
 
 set(SOURCES
@@ -23,11 +26,13 @@ set(SOURCES
     src/blkstorage.cpp
     src/data_base_disk.cpp
     src/sql_parser.cpp
+    src/data_base_pmem.cpp
+    src/pmem_log.cpp
 )
 
 add_executable(block_storage ${SOURCES} ${HEADERS})
 
-target_link_libraries(block_storage -lpmemobj)
+target_link_libraries(block_storage -lpmemobj -lpmemlog)
 
 target_include_directories(block_storage
     PRIVATE

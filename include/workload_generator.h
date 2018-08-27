@@ -16,7 +16,7 @@ public:
         skew_window_(skew_window),
         tx_size_(tx_size),
         r_(),
-        mt_(r_),
+        mt_(r_()),
         exp_(skew_factor),
         db_(db) {}
 
@@ -30,7 +30,7 @@ public:
         do {
             obj_id = floor(-exp_(mt_)) + newest_;
         } while (obj_id < 0);
-        tx.push_back(obj_id);
+        tx.push_back(GenerateEntry(obj_id));
     } while (tx.size() < std::min(tx_size_, newest_));
     advance_counter_++;
     if (advance_counter_ == skew_window_) {
@@ -42,7 +42,8 @@ public:
 
 private:
     TxEntry<DBKey,DBValue> GenerateEntry(int obj_id) {
-        return TxRead(TxInsert, static_cast<DBKey>(obj_id));
+        return TxEntry<DBKey,DBValue>(TxWrite, static_cast<DBKey>(obj_id),
+                                      std::unique_ptr<DBValue>(new DBValue()));
     }
     int skew_window_ = 1;
     int tx_size_ = 1;

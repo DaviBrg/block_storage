@@ -11,23 +11,23 @@
 #include <vector>
 
 
-template <typename T>
+template <typename Key, typename Value>
 struct ListNode {
-        pmem::obj::persistent_ptr<ListNode<T>> next;
-        pmem::obj::persistent_ptr<ListNode<T>> prev;
-        pmem::obj::p<uint64_t> id;
-        pmem::obj::p<T> obj;
+        pmem::obj::persistent_ptr<ListNode<Key,Value>> next;
+        pmem::obj::persistent_ptr<ListNode<Key,Value>> prev;
+        pmem::obj::p<Key> id;
+        pmem::obj::p<Value> obj;
 };
 
-template <typename T>
+template <typename Key, typename Value>
 class PersistentList {
 
 public:
 
     void Commit(pmem::obj::pool_base &pool,
-                const std::vector<T> &intention_list,
-                std::unordered_map<uint64_t,
-                pmem::obj::persistent_ptr<ListNode<T>>> &lookup_table) {
+                const std::vector<Value> &intention_list,
+                std::unordered_map<Key,
+                pmem::obj::persistent_ptr<ListNode<Key,Value>>> &lookup_table) {
 
         pmem::obj::transaction::exec_tx(pool, [&](){
 
@@ -54,9 +54,9 @@ public:
     }
 
     void RecoverNVM(pmem::obj::pool_base &pool,
-                    std::unordered_map<uint64_t,T> &data_base,
-                    std::unordered_map<uint64_t,
-                    pmem::obj::persistent_ptr<ListNode<T>>> &lookup_table) {
+                    std::unordered_map<Key,Value> &data_base,
+                    std::unordered_map<Key,
+                    pmem::obj::persistent_ptr<ListNode<Key,Value>>> &lookup_table) {
         auto current = head_;
         while (current != nullptr) {
             data_base.insert({current->obj.get_ro().id, current->obj.get_ro()});
@@ -67,9 +67,9 @@ public:
 
 
 private:
-    pmem::obj::persistent_ptr<ListNode<T>>
-    AddNewEntry(const T &entry) {
-        auto entry_node = pmem::obj::make_persistent<ListNode<T>>();
+    pmem::obj::persistent_ptr<ListNode<Key,Value>>
+    AddNewEntry(const Value &entry) {
+        auto entry_node = pmem::obj::make_persistent<ListNode<Key,Value>>();
         entry_node->id = entry.id;
         entry_node->obj = entry;
         if (head_ == nullptr) {
@@ -84,8 +84,8 @@ private:
         return entry_node;
     }
 
-    pmem::obj::persistent_ptr<ListNode<T>> head_;
-    pmem::obj::persistent_ptr<ListNode<T>> tail_;
+    pmem::obj::persistent_ptr<ListNode<Key,Value>> head_;
+    pmem::obj::persistent_ptr<ListNode<Key,Value>> tail_;
 };
 
 #endif // PERSISTENTLIST_H

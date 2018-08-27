@@ -1,21 +1,18 @@
-#ifndef DATA_BASE_DISK_H
-#define DATA_BASE_DISK_H
+#ifndef DATA_BASE_PMEM_H
+#define DATA_BASE_PMEM_H
 
-#include <memory>
-#include <string>
 #include <unordered_map>
 #include <vector>
 
-#include "disk_log.h"
+#include "pmem_log.h"
 #include "txentry.h"
 
-
 template <typename Key, typename Value>
-class DataBaseDisk {
+class DataBasePmem {
 public:
-
-    DataBaseDisk(const std::string &path) :
-        diskLog(path),
+    DataBasePmem(const char* path_):
+        path(path_),
+        pmemLog(path),
         tx_id(0) {}
 
     size_t ExecuteTransaction(const std::vector<TxEntry<Key,Value>> &tx) {}
@@ -26,10 +23,8 @@ public:
 
 private:
     std::unordered_map<Key,Value> data_base_;
-    DiskLog diskLog;
-    int indexBlock;
-    LogBlock logB;
+    const char* path;
+    PmemLog pmemLog;
     int tx_id;
 };
-
-#endif // DATA_BASE_DISK_H
+#endif // DATA_BASE_PMEM_H

@@ -4,10 +4,8 @@
 #include <memory>
 
 enum TxType {
-    TxInsert,
     TxRead,
-    TxUpdate,
-    TxDelete
+    TxWrite
 };
 
 template <typename Key, typename Value>
