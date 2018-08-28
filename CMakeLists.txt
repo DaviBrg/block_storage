@@ -18,6 +18,7 @@ set(HEADERS
     include/pmem_log.h
     include/disk_pmem.h
     include/data_base_pmem_disk.h
+    include/performance_logger.h
 )
 
 set(SOURCES
@@ -28,6 +29,7 @@ set(SOURCES
     src/sql_parser.cpp
     src/data_base_pmem.cpp
     src/pmem_log.cpp
+    src/performance_logger.cpp
 )
 
 add_executable(block_storage ${SOURCES} ${HEADERS})

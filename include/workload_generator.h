@@ -6,6 +6,7 @@
 #include <vector>
 #include <random>
 #include <cmath>
+#include <chrono>
 
 template <typename DBType>
 class WorkloadGenerator {
@@ -38,7 +39,11 @@ public:
         advance_counter_ = 0;
         newest_++;
     }
-    db_->ExecuteTransaction(tx);
+    auto before = std::chrono::high_resolution_clock::now();
+    size_t n_tx= db_->ExecuteTransaction(tx);
+    auto after = std::chrono::high_resolution_clock::now();
+    size_t ms = std::chrono::duration_cast<std::chrono::milliseconds>
+            (after- before).count();
 }
 
 private:

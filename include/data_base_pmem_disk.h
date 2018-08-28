@@ -42,6 +42,12 @@ public:
                 intention_list.push_back(*(entry.value()));
                 data_base_[entry.key()] = *(entry.value());
             }
+            else {
+                auto itr = data_base_.find(entry.key());
+                if (itr != std::end(data_base_)) {
+                    *(entry.value()) = itr->second;
+                }
+            }
         }
 
         list_->Commit(pool, intention_list, lookup_table_);
