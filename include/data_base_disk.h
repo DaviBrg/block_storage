@@ -13,6 +13,8 @@
 template <typename Key, typename Value>
 class DataBaseDisk {
 public:
+    typedef Key key_type;
+    typedef Value value_type;
 
     DataBaseDisk(const std::string &path) :
         diskLog(path),

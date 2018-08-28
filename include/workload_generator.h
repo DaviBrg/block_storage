@@ -7,9 +7,10 @@
 #include <random>
 #include <cmath>
 
-template <typename DBType, typename DBKey, typename DBValue>
-class WorkloadGenerator
-{
+template <typename DBType>
+class WorkloadGenerator {
+    using DBKey = typename DBType::key_type;
+    using DBValue = typename  DBType::value_type;
 public:
     WorkloadGenerator(double skew_factor,int skew_window,
                       int tx_size, DBType *db):

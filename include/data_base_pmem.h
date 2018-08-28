@@ -10,6 +10,9 @@
 template <typename Key, typename Value>
 class DataBasePmem {
 public:
+    typedef Key key_type;
+    typedef Value value_type;
+
     DataBasePmem(const char* path_):
         path(path_),
         pmemLog(path),

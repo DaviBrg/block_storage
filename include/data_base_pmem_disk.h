@@ -11,6 +11,8 @@
 template <typename Key, typename Value>
 class DataBasePmemDisk {
 public:
+    typedef Key key_type;
+    typedef Value value_type;
 
     DataBasePmemDisk(size_t pool_size, const std::string &path, const std::string &layout) :
     pool_size_(pool_size), path_(path), layout_(layout){

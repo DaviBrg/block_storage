@@ -28,7 +28,7 @@ constexpr size_t ntx = 20000;
 
 int main() {
     DataBasePmemDisk<size_t,Tuple> db_pmem_disk(4000000000, "/mnt/mem/pmem_content", "queue");
-    WorkloadGenerator<DataBasePmemDisk<size_t,Tuple>, size_t, Tuple> wg(0.05, 10, 3, &db_pmem_disk);
+    WorkloadGenerator<decltype(db_pmem_disk)> wg(0.05, 10, 3, &db_pmem_disk);
     for (size_t i=0;i<ntx;i++) {
         wg.GenerateTx();
         std::cout << (double(i)/ntx)*100<< "%" << std::endl;
