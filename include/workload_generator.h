@@ -1,12 +1,13 @@
 #ifndef WORKLOAD_GENERATOR_H
 #define WORKLOAD_GENERATOR_H
 
-#include "txentry.h"
-
 #include <vector>
 #include <random>
 #include <cmath>
 #include <chrono>
+
+#include "txentry.h"
+#include "performance_logger.h"
 
 template <typename DBType>
 class WorkloadGenerator {
@@ -14,13 +15,14 @@ class WorkloadGenerator {
     using DBValue = typename  DBType::value_type;
 public:
     WorkloadGenerator(double skew_factor,int skew_window,
-                      int tx_size, DBType *db):
+                      int tx_size, DBType *db, const std::string &log_file):
         skew_window_(skew_window),
         tx_size_(tx_size),
         r_(),
         mt_(r_()),
         exp_(skew_factor),
-        db_(db) {}
+        db_(db),
+        pl_(log_file){}
 
     virtual ~WorkloadGenerator() {}
 
@@ -39,11 +41,16 @@ public:
         advance_counter_ = 0;
         newest_++;
     }
+
+    size_t n_tx = 0;
     auto before = std::chrono::high_resolution_clock::now();
-    size_t n_tx= db_->ExecuteTransaction(tx);
+    while (0 == n_tx) {
+        n_tx= db_->ExecuteTransaction(tx);
+    }
     auto after = std::chrono::high_resolution_clock::now();
     size_t ms = std::chrono::duration_cast<std::chrono::milliseconds>
-            (after- before).count();
+            (after - before).count();
+    pl_.Log(n_tx, ms);
 }
 
 private:
@@ -59,6 +66,7 @@ private:
     int advance_counter_ = 0;
     int newest_ = 1;
     DBType *db_ = nullptr;
+    PerformanceLogger pl_;
 };
 
 #endif // WORKLOAD_GENERATOR_H

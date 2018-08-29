@@ -51,7 +51,7 @@ public:
         }
 
         list_->Commit(pool, intention_list, lookup_table_);
-
+        return 1;
     }
 
     void Recover() { list_->RecoverNVM(pool, data_base_, lookup_table_);}
