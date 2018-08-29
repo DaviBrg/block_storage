@@ -1,6 +1,8 @@
 #include <iostream>
 
 #include "data_base_pmem_disk.h"
+#include "data_base_disk.h"
+#include "data_base_pmem.h"
 #include "workload_generator.h"
 
 
@@ -9,15 +11,18 @@ struct Tuple {
     char data[120];
 };
 
-constexpr size_t kPoolSize = 4000000000;
-constexpr size_t kSafePoolSize = 3500000000;
-constexpr size_t kTxSize = 3;
-constexpr size_t n_tx = kSafePoolSize / ((sizeof(Tuple) + sizeof(ListNode<size_t,Tuple>)*kTxSize));
+constexpr size_t kPoolSize = 2000000000;
+constexpr size_t kSafePoolSize = 1700000000;
+constexpr size_t kTxExpSize = 3;
+constexpr size_t const_n_tx = kSafePoolSize / ((sizeof(Tuple) + sizeof(ListNode<size_t,Tuple>)*kTxSize));
 
 
 int main() {
-    DataBasePmemDisk<size_t,Tuple> db_pmem_disk(kPoolSize, "/mnt/mem/pmem_content", "queue");
-    WorkloadGenerator<decltype(db_pmem_disk)> wg(0.05, 50, kTxSize, &db_pmem_disk, "/home/davi/log.txt");
+    size_t n_tx = 20000;
+//    DataBasePmemDisk<size_t,Tuple> db(kPoolSize, "/mnt/mem/pmem_content", "queue");
+//    DataBaseDisk<size_t,Tuple> db("/home/luiky/block_storage");
+    DataBasePmem<size_t,Tuple> db("/mnt/mem/pmem_content", kPoolSize);
+    WorkloadGenerator<decltype(db)> wg(0.05, 50, disk_pmem::kTxSize, &db, "/home/luiky/log_pmem.txt");
     for (size_t i=0;i<n_tx;i++) {
         wg.GenerateTx();
         std::cout << (double(i)/n_tx)*100<< "%" << std::endl;

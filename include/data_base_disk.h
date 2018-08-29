@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "disk_log.h"
+#include "disk_pmem.h"
 #include "txentry.h"
 
 
@@ -20,7 +21,41 @@ public:
         diskLog(path),
         tx_id(0) {}
 
-    size_t ExecuteTransaction(const std::vector<TxEntry<Key,Value>> &tx) {}
+    size_t ExecuteTransaction(std::vector<TxEntry<Key,Value>> &tx) {
+        int counter = 0;
+
+        for (auto& action:tx) {
+            LogUpdate<Value> logU;
+            Value* ptr = action.value();
+
+            logU.obj_id = action.key();
+            logU.img_after = *ptr;
+            if(action.type() == TxWrite) {
+                data_base_[action.key()] = *ptr;
+            }
+            else {
+                *ptr = data_base_[action.key()];
+            }
+            logU.tx_id = tx_id;
+            (logB.entries[indexBlock]).updates[counter++] = logU;
+        }
+        for(int i = counter; i < disk_pmem::kTxSize; i++ )
+        {
+            (logB.entries[indexBlock]).updates[i].obj_id = -1;
+            (logB.entries[indexBlock]).updates[i].tx_id = -1;
+        }
+        LogCommit logC;
+
+        logC.tx_id = tx_id;
+        (logB.entries[indexBlock++]).commit = logC;
+        tx_id++;
+        if(indexBlock == disk_pmem::NumLogEntries<Value>()) {
+            indexBlock = 0;
+            diskLog.write(logB);
+            return disk_pmem::NumLogEntries<Value>();
+        }
+        return 0;
+    }
 
     void Recover() {}
 
@@ -28,9 +63,9 @@ public:
 
 private:
     std::unordered_map<Key,Value> data_base_;
-    DiskLog diskLog;
+    DiskLog<Value> diskLog;
     int indexBlock;
-    LogBlock logB;
+    LogBlock<Value> logB;
     int tx_id;
 };
 

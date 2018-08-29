@@ -48,7 +48,7 @@ public:
         n_tx= db_->ExecuteTransaction(tx);
     }
     auto after = std::chrono::high_resolution_clock::now();
-    size_t ms = std::chrono::duration_cast<std::chrono::milliseconds>
+    size_t ms = std::chrono::duration_cast<std::chrono::microseconds>
             (after - before).count();
     pl_.Log(n_tx, ms);
 }

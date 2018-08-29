@@ -1,48 +1,40 @@
 #ifndef DISK_LOG_H
 #define DISK_LOG_H
 
-#include "block_storage.h"
-
 #include <string>
 #include <map>
 
+#include "block_storage.h"
+#include "disk_pmem.h"
 
-const unsigned int kTxSize = 3;
-
-struct LogUpdate {
-    unsigned int tx_id;
-    unsigned int obj_id;
-    double img_after;
-}__attribute__((packed));
-
-struct LogCommit {
-    unsigned int tx_id;
-}__attribute__((packed));
-
-struct LogEntry {
-    LogUpdate updates[kTxSize];
-    LogCommit commit;
-}__attribute__((packed));
-
-struct LogBlock {
-    LogEntry entries[78];
-    int v[10];
-}__attribute__((packed));
-
+using namespace disk_pmem;
+template <typename T>
 class DiskLog {
 private:
 
-    Block<LogBlock> block;
-    BlockStorage<LogBlock> storage;
+    Block<LogBlock<T>> block;
+    BlockStorage<LogBlock<T>> storage;
     int offset;
     std::string path;
 
 public:
 
-     DiskLog(std::string path_);
-     int getOffSet();
-     Block<LogBlock> read(int offset_);
-     void write(const LogBlock &logB);
+    DiskLog(std::string path_) : offset(0), path(path_), storage(path_){
+        storage.ClearFile();
+    }
+    int getOffSet() {
+        return offset;
+    }
+    Block<LogBlock<T>> read(int offset_) {
+        storage.ReadBlock(offset_,block);
+        return block;
+    }
+    void write(const LogBlock<T> &logB) {
+        block.SetData(logB);
+        if (storage.WriteBlock(offset++, block) != blkstorage::kNoError) {
+            std::cout << "There was an error during WriteBlock()." << std::endl;
+        }
+    }
 };
 
 #endif // DISK_LOG_H
